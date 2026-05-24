@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cirrosis-detection"
+version = "0.1.0"
+description = "Detección de cirrosis hepática avanzada en RM abdominal (CirrMRI600+) — Proyecto final ISIS-4825 Imágenes y Visión, Universidad de los Andes"
+readme = "README.md"
+requires-python = ">=3.10,<3.12"
+authors = [
+    { name = "Sebastian Umaña Peinado" },
+    { name = "Jerónimo Franco Castañeda" },
+]
+license = { text = "MIT" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q"
+
+[tool.mypy]
+python_version = "3.10"
+strict = false
+ignore_missing_imports = true

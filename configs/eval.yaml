@@ -1,0 +1,42 @@
+# Configuración de evaluación final (comparación radiomics vs DL).
+defaults: { data: data.yaml }
+
+bootstrap:
+  n_resamples: 1000
+  ci: 0.95
+  seed: 42
+
+metrics:
+  - auc_roc
+  - auc_pr
+  - f1
+  - mcc
+  - sensitivity_at_youden
+  - specificity_at_youden
+
+models_to_compare:
+  - name: radiomics_logreg
+    pred_csv: reports/tables/radiomics_logreg_preds.csv
+  - name: radiomics_xgb
+    pred_csv: reports/tables/radiomics_xgb_preds.csv
+  - name: dl_2_5d_resnet50
+    pred_csv: reports/tables/dl_2_5d_preds.csv
+
+statistical_tests:
+  delong:
+    pairs:
+      - [radiomics_xgb, dl_2_5d_resnet50]
+      - [radiomics_logreg, dl_2_5d_resnet50]
+
+gradcam:
+  layer: layer4               # ResNet última capa convolucional.
+  n_samples_per_class: 5      # Para análisis cualitativo en el paper.
+  pointing_game_threshold: 0.5
+
+output:
+  results_csv: reports/tables/main_results.csv
+  roc_pr_fig: reports/figures/roc_pr_curves.png
+  cm_fig: reports/figures/confusion_matrix.png
+  delong_csv: reports/tables/delong.csv
+  error_analysis_dir: reports/figures/error_analysis
+  gradcam_dir: reports/figures/gradcam

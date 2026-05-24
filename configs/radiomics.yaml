@@ -1,0 +1,37 @@
+# Baseline radiómico: PyRadiomics → selección → clasificador shallow.
+defaults: { data: data.yaml }
+
+features:
+  binWidth: 25                # PyRadiomics: ancho del bin para histograma de intensidades.
+  resampledPixelSpacing: null # null = no resamplear de nuevo (ya hecho en preprocess).
+  geometryTolerance: 1e-4
+  classes:
+    - firstorder
+    - shape
+    - glcm
+    - glrlm
+    - glszm
+    - ngtdm
+    - gldm
+  wavelet: true               # Wavelet-LLL, LLH, etc. — añade ~700 features extra.
+
+selection:
+  method: lasso               # lasso | mrmr | univariate_f
+  k_features: 30              # top-k tras selección.
+  inner_cv_folds: 3           # CV interna para tuning de selección.
+
+classifier:
+  models:
+    - name: logreg
+      kwargs: { C: 1.0, class_weight: balanced, max_iter: 2000, solver: lbfgs }
+    - name: rf
+      kwargs: { n_estimators: 500, max_depth: 8, class_weight: balanced, n_jobs: -1, random_state: 42 }
+    - name: xgb
+      kwargs: { n_estimators: 600, max_depth: 5, learning_rate: 0.05, scale_pos_weight: 6.2 }
+
+aggregation:
+  per_slice_to_patient: mean  # mean | max | attention-mean-weighted.
+
+output:
+  results_csv: reports/tables/radiomics_results.csv
+  feature_importance_csv: reports/tables/radiomics_feature_importance.csv

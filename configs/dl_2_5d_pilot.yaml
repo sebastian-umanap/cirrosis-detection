@@ -1,0 +1,44 @@
+# Piloto: 1 fold solo, para medir tiempo real por epoch antes de comprometerse a 5-fold.
+defaults: { data: data.yaml }
+
+model:
+  arch: resnet50
+  pretrained_weights: imagenet
+  in_channels: 3
+  num_classes: 1
+  dropout: 0.3
+  attention_pool: gated
+
+train:
+  epochs: 15                # más corto para piloto
+  early_stopping_patience: 4
+  early_stopping_metric: val_auc
+  amp: true
+  channels_last: true
+  grad_accum_steps: 1
+  grad_clip_norm: 1.0
+  loss:
+    name: bce_with_logits
+    pos_weight_auto: true
+    focal_gamma: 2.0
+  optimizer:
+    name: adamw
+    lr_backbone: 1.0e-4
+    lr_head: 1.0e-3
+    weight_decay: 1.0e-4
+  scheduler:
+    name: cosine
+    warmup_epochs: 1
+    min_lr: 1.0e-6
+
+seed: 42
+
+# Override de slices y batch para el piloto
+override_slices_train: 8       # mitad del valor por defecto, acelera
+override_batch_size: 32        # sube de 16 a 32 (VRAM permite)
+
+output:
+  checkpoint_dir: reports/checkpoints_pilot
+  logs_dir: reports/logs_pilot
+  results_csv: reports/tables/dl_pilot_results.csv
+  timing_csv: reports/timing_pilot.csv

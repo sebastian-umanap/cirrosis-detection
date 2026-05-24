@@ -1,0 +1,56 @@
+# Datos crudos y derivados (no van al repo; ver scripts/download_cirrmri.md)
+data/CirrMRI600plus*/
+data/cache/
+data/quarantine.csv
+!data/.gitkeep
+
+# Checkpoints de DL (no van al repo por tamaño)
+reports/checkpoints/*
+!reports/checkpoints/.gitkeep
+reports/logs/
+reports/figures/error_analysis/
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.keras
+*.onnx
+
+# Logs de corridas (regenerables)
+*.log
+
+# Cache de paper LaTeX (si por algún motivo se reincorpora el paper)
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# Notebook artifacts
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.key
+*.pem
+kaggle.json
+osf-token.txt

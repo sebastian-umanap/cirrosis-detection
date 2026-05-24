@@ -1,0 +1,40 @@
+# Configuración del modelo principal: 2.5D ResNet-50 con transfer learning + attention pooling.
+defaults: { data: data.yaml }
+
+model:
+  arch: resnet50
+  pretrained_weights: imagenet      # imagenet | radimagenet | none
+  in_channels: 3                    # 3 cortes axiales como canales (stack 2.5D).
+  num_classes: 1                    # 1 = sigmoid binario; cambiar a 3 para tarea de severidad.
+  dropout: 0.3
+  attention_pool: gated             # gated (Ilse et al. 2018) | mean | max
+
+train:
+  epochs: 15                        # ajustado tras pilot: val_auc se satura temprano; 15 con paciencia 4.
+  early_stopping_patience: 4
+  early_stopping_metric: val_auc    # val_auc | val_loss
+  amp: true                         # mixed precision torch.cuda.amp
+  channels_last: true               # mejor uso de tensor cores
+  grad_accum_steps: 1               # batch físico 32 ya es suficiente; sin accum.
+  grad_clip_norm: 1.0
+  loss:
+    name: bce_with_logits           # bce_with_logits | focal
+    pos_weight_auto: true           # calcula pos_weight desde el split train
+    focal_gamma: 2.0                # solo si name=focal
+  optimizer:
+    name: adamw
+    lr_backbone: 1.0e-4
+    lr_head: 1.0e-3
+    weight_decay: 1.0e-4
+  scheduler:
+    name: cosine
+    warmup_epochs: 1
+    min_lr: 1.0e-6
+
+seed: 42
+
+output:
+  checkpoint_dir: reports/checkpoints
+  logs_dir: reports/logs
+  results_csv: reports/tables/dl_results.csv
+  timing_csv: reports/timing.csv

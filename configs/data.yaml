@@ -1,0 +1,49 @@
+# Configuración de carga y preprocessing del dataset CirrMRI600+.
+# Paths relativos a la raíz del proyecto (cirrosis-detection/).
+
+dataset:
+  root: data/CirrMRI600plus_raw     # Ajustar tras descargar; ver scripts/download_cirrmri.md.
+  cache_dir: data/cache             # Tensores preprocesados (.pt) — acelera reentrenamientos.
+  modality: T1w                     # T1w | T2w | both (both = stack canal-wise).
+  task: binary                      # binary (cirrhotic vs healthy) | severity (1/2/3 entre cirróticos).
+  metadata_csv: null                # Se autodetecta dentro de root; sobreescribir aquí si hay layout custom.
+
+# Splits.
+splits:
+  scheme: stratified_group_kfold    # StratifiedGroupKFold con groups=patient_id.
+  n_folds: 5
+  seed: 42
+  test_fold: null                   # null = no hold-out final, todos los folds para CV.
+
+# Preprocessing (justificación detallada en reports/02 §Fase 2).
+preprocess:
+  reorient: RAS                     # Re-orienta a canónico RAS+.
+  resample_spacing: [1.0, 1.0, 5.0] # mm; ajustado tras EDA (Z nativo medio = 5.6 mm) — 5 mm preserva resolución nativa sin upsampling artificial.
+  clip_percentiles: [0.5, 99.5]     # Clipping local por volumen (RM no tiene HU estandarizado).
+  normalize: zscore                 # Media 0, std 1 por volumen.
+  crop_around_mask: true            # Crop alrededor de la máscara hepática.
+  crop_margin: 16                   # Píxeles de margen alrededor del bbox de la máscara.
+  out_size: [224, 224]              # In-plane después de crop+resize; encaja en ResNet-50.
+
+# Stack 2.5D (para modelo principal).
+stack_2_5d:
+  n_slices: 3                       # Stack de 3 cortes axiales consecutivos.
+  selection: centered_on_mask       # centered_on_mask | uniform | all
+  slices_per_patient_train: 8       # Sub-muestreo aleatorio en train (8 confirmado en pilot).
+  slices_per_patient_eval: 16       # Cobertura razonable en eval; reducido tras pilot para acelerar.
+
+# Augmentation (solo train).
+augment:
+  prob_flip_h: 0.5
+  rotation_deg: 10
+  elastic_prob: 0.3
+  gamma: [0.8, 1.2]
+  gaussian_noise_std: 0.05
+  motion_prob: 0.1                  # TorchIO motion artifact.
+
+# DataLoader.
+dataloader:
+  batch_size: 32                    # subido tras EDA: solo 0.75-4 GB de los 12.9 GB de VRAM se usan.
+  num_workers: 4
+  pin_memory: true
+  prefetch_factor: 2
