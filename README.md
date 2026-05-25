@@ -63,7 +63,7 @@ cirrosis-detection/
 |---|---|---|
 | Dataset CirrMRI600+ (`data/CirrMRI600plus_raw/`) | ~5.5 GB | `python scripts/download_cirrmri.py --dest data/CirrMRI600plus_raw` (descarga desde [OSF](https://osf.io/cuk24/)) |
 | Cache pre-procesado (`data/cache/`) | ~6.6 GB | Se genera al correr el pipeline (paso 2 abajo). No se sube al repo. |
-| Checkpoints del DL (`reports/checkpoints/resnet25d_fold{0..4}.pt`, `resnet25d_binary_best.pt`) | ~550 MB | Se generan al entrenar (paso 4). Para la entrega académica se incluyen en una carpeta de extras aparte. |
+| Checkpoints del DL (`reports/checkpoints/resnet25d_fold{0..4}.pt`, `resnet25d_binary_best.pt`) | ~550 MB | `python scripts/download_checkpoints.py` descarga los 6 desde el [release v1.0](https://github.com/sebastian-umanap/cirrosis-detection/releases/tag/v1.0). Para correr solo la app basta con `--only resnet25d_binary_best.pt` (92 MB). También se regeneran entrenando (paso 4). |
 
 ---
 
@@ -150,6 +150,15 @@ Más detalles paso a paso en [reports/RUNBOOK.md](reports/RUNBOOK.md).
 ---
 
 ## App de demostración
+
+**Camino rápido (sin entrenar, solo correr la demo):** instala dependencias (sección _Setup_), descarga el checkpoint y lanza la app.
+
+```powershell
+python scripts/download_checkpoints.py --only resnet25d_binary_best.pt
+.\run_app.bat
+```
+
+Cualquier estudio NIfTI del dataset + su máscara sirven como ejemplo. Si aún no tienes el dataset, ver paso 1 de _Reproducir resultados_.
 
 ```powershell
 # Windows: doble-click en run_app.bat (puerto 8400)
