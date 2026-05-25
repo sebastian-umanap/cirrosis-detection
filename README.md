@@ -7,7 +7,7 @@ sdk: docker
 app_port: 7860
 pinned: false
 license: mit
-short_description: Cirrosis avanzada en RM con ResNet-50 2.5D sobre CirrMRI600+.
+short_description: Detección de cirrosis en RM (ResNet-50 2.5D, CirrMRI600+)
 ---
 
 # Detección de cirrosis hepática avanzada en RM abdominal
