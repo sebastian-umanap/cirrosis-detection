@@ -9,18 +9,43 @@ Para correr:
 from __future__ import annotations
 
 import io
+import sys
 import tempfile
+import urllib.request
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import streamlit as st
 
-from src.inference.pipeline import InferenceResult, load_pipeline
+# Garantiza que `src/` sea importable cuando la app corre desde la raíz (HF Spaces).
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from src.inference.pipeline import InferenceResult, load_pipeline  # noqa: E402
 
 # ----------------------------------------------------------------------------
 # Configuración
 # ----------------------------------------------------------------------------
+
+CHECKPOINT_RELEASE_URL = (
+    "https://github.com/sebastian-umanap/cirrosis-detection/releases/download/v1.0"
+)
+
+
+def _ensure_checkpoint(path: Path) -> Path:
+    """Descarga el checkpoint desde el release de GitHub si no existe localmente.
+
+    Pensado para despliegues (HF Spaces / Streamlit Cloud) donde el .pt no está en el repo.
+    La descarga ocurre una vez por contenedor; queda cacheada en `reports/checkpoints/`.
+    """
+    if path.exists():
+        return path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    url = f"{CHECKPOINT_RELEASE_URL}/{path.name}"
+    with st.spinner(f"Descargando checkpoint {path.name} (~92 MB, una sola vez por sesión)…"):
+        urllib.request.urlretrieve(url, path)  # noqa: S310
+    return path
+
 
 def _default_binary_ckpt() -> Path:
     """Devuelve el primer checkpoint disponible: 'best' si existe, si no fold0..4."""
@@ -98,11 +123,13 @@ if uploaded is None:
     st.info("Sube un estudio para empezar. Para resultados válidos, sube también la máscara hepática del hígado.")
     st.stop()
 
-# Validación básica del checkpoint.
-if not Path(binary_ckpt).exists():
-    st.warning(
-        f"El checkpoint `{binary_ckpt}` no existe todavía. Entrena un modelo y guarda el peso allí, "
-        "o ajusta el path en la barra lateral."
+# Garantiza el checkpoint: si no está local, lo descarga del release v1.0.
+try:
+    _ensure_checkpoint(Path(binary_ckpt))
+except Exception as exc:  # noqa: BLE001
+    st.error(
+        f"No se pudo asegurar el checkpoint `{binary_ckpt}`: {exc}. "
+        "Verifica conectividad o ajusta el path en la barra lateral."
     )
     st.stop()
 

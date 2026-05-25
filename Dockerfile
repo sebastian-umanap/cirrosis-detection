@@ -1,5 +1,5 @@
-# Imagen mínima para servir la app Streamlit (inferencia CPU).
-# Para entrenamiento usar entorno con GPU local (RTX 3060 12 GB).
+# Imagen para Hugging Face Spaces (CPU) — sirve la app Streamlit.
+# Para entrenamiento usar entorno con GPU local.
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -7,31 +7,32 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Dependencias de sistema mínimas para nibabel/SimpleITK/dicom2nifti
+# Dependencias de sistema mínimas para nibabel/dicom2nifti.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         libgl1 \
         libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+# Usuario no-root: requisito de Hugging Face Spaces (UID 1000).
+RUN useradd -m -u 1000 user
+USER user
+ENV PATH="/home/user/.local/bin:$PATH"
 
-# Instalar torch CPU primero (más liviano que la versión CUDA)
-RUN pip install --extra-index-url https://download.pytorch.org/whl/cpu \
-        torch==2.3.1 torchvision==0.18.1
+WORKDIR /home/user/app
 
-COPY requirements.txt ./
-# Re-instala todo respetando requirements.txt; torch ya está en cache
-RUN pip install -r requirements.txt
+# Instala dependencias como `user`. requirements.txt ya pinea torch CPU vía extra-index.
+COPY --chown=user requirements.txt ./
+RUN pip install --user -r requirements.txt
 
-COPY src/ ./src/
-COPY app/ ./app/
-COPY configs/ ./configs/
-COPY reports/checkpoints/ ./reports/checkpoints/
+# Copia el código. Los checkpoints se descargan en runtime desde el release v1.0
+# (ver streamlit_app.py::_ensure_checkpoint), así que no se incluyen en la imagen.
+COPY --chown=user src/ ./src/
+COPY --chown=user app/ ./app/
+COPY --chown=user configs/ ./configs/
+COPY --chown=user reports/ ./reports/
+COPY --chown=user scripts/ ./scripts/
 
-EXPOSE 8501
-HEALTHCHECK CMD curl -fsS http://localhost:8501/_stcore/health || exit 1
+EXPOSE 7860
 
-CMD ["streamlit", "run", "app/streamlit_app.py", \
-     "--server.port=8501", "--server.address=0.0.0.0", \
-     "--server.headless=true"]
+CMD ["streamlit", "run", "app/streamlit_app.py", "--server.port=7860", "--server.address=0.0.0.0", "--server.headless=true", "--server.enableCORS=false"]

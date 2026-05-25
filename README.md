@@ -1,3 +1,15 @@
+---
+title: Detección de cirrosis · RM abdominal
+emoji: 🩺
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+short_description: Cirrosis avanzada en RM con ResNet-50 2.5D sobre CirrMRI600+.
+---
+
 # Detección de cirrosis hepática avanzada en RM abdominal
 
 Proyecto final · **ISIS-4825 Imágenes y Visión** · Universidad de los Andes (202610)
@@ -86,10 +98,11 @@ python -m venv .venv
 
 pip install --upgrade pip
 pip install "numpy<2.0"
-pip install -r requirements.txt
+pip install -r requirements.txt           # runtime: app + inferencia (CPU)
+pip install -r requirements-dev.txt       # opcional: stack completo de entrenamiento
 ```
 
-PyTorch con CUDA (ajusta a tu CUDA):
+PyTorch con CUDA (solo si vas a entrenar; ajusta a tu CUDA):
 
 ```powershell
 pip install torch==2.3.1 torchvision==0.18.1 --index-url https://download.pytorch.org/whl/cu121
