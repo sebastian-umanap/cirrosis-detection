@@ -218,18 +218,3 @@ Verifica los puntos críticos: cero leakage paciente-a-fold, métricas correctas
 - Tiempos reales de entrenamiento por fold en `reports/timing.csv`.
 - Las predicciones out-of-fold y métricas finales están en `reports/tables/`.
 
-## Licencia
-
-- Código: MIT (este repositorio).
-- Dataset CirrMRI600+: **CC-BY-SA 4.0** (Choi/Jha et al., *Sci Data* 2025, DOI [10.1038/s41597-025-05201-7](https://doi.org/10.1038/s41597-025-05201-7)).
-
-## Citar este trabajo
-
-```bibtex
-@misc{umana_franco_2026_cirrosis,
-  title  = {Detección automática de cirrosis hepática avanzada en RM abdominal mediante aprendizaje profundo: un estudio sobre CirrMRI600+},
-  author = {Uma{\~n}a Peinado, Sebastian and Franco Casta{\~n}eda, Jer{\'o}nimo},
-  year   = {2026},
-  note   = {Proyecto final, ISIS-4825, Universidad de los Andes}
-}
-```
